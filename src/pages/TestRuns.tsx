@@ -1,12 +1,16 @@
 import { useState } from "react";
-import { demoTestRuns, demoProjects, demoTestSteps } from "@/lib/demo-data";
+import { useAppState } from "@/context/AppStateContext";
+import { demoTestSteps } from "@/lib/demo-data";
 import TestRunRow from "@/components/dashboard/TestRunRow";
-import { CheckCircle, XCircle, SkipForward, AlertTriangle, X } from "lucide-react";
+import NewTestRunDialog from "@/components/dialogs/NewTestRunDialog";
+import { CheckCircle, XCircle, SkipForward, AlertTriangle, X, Play } from "lucide-react";
 
 export default function TestRuns() {
+  const { testRuns, projects } = useAppState();
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
-  const selectedRun = demoTestRuns.find((r) => r.id === selectedRunId);
-  const getProjectName = (id: string) => demoProjects.find((p) => p.id === id)?.name ?? "";
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const selectedRun = testRuns.find((r) => r.id === selectedRunId);
+  const getProjectName = (id: string) => projects.find((p) => p.id === id)?.name ?? "";
 
   const stepIcons = {
     passed: <CheckCircle className="w-4 h-4 text-success" />,
@@ -21,22 +25,23 @@ export default function TestRuns() {
           <h1 className="text-2xl font-bold text-foreground">Test Runs</h1>
           <p className="text-sm text-muted-foreground mt-1">All test execution history</p>
         </div>
-        <button className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-          ▶ New Test Run
+        <button onClick={() => setDialogOpen(true)} className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+          <Play className="w-4 h-4" /> New Test Run
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Runs list */}
         <div className="lg:col-span-3 glass-card p-4 space-y-1">
-          {demoTestRuns.map((run) => (
-            <div key={run.id} onClick={() => setSelectedRunId(run.id)} className="cursor-pointer">
+          {testRuns.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-8">No test runs yet. Click "New Test Run" to start.</p>
+          )}
+          {testRuns.map((run) => (
+            <div key={run.id} onClick={() => setSelectedRunId(run.id)} className={`cursor-pointer rounded-xl transition-colors ${selectedRunId === run.id ? "bg-primary/5 ring-1 ring-primary/20" : ""}`}>
               <TestRunRow run={run} projectName={getProjectName(run.projectId)} />
             </div>
           ))}
         </div>
 
-        {/* Detail panel */}
         <div className="lg:col-span-2">
           {selectedRun ? (
             <div className="glass-card p-5 space-y-5 sticky top-20">
@@ -46,6 +51,22 @@ export default function TestRuns() {
                   <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Progress bar for running tests */}
+              {selectedRun.status === "running" && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Progress</span>
+                    <span>{selectedRun.passedTests + selectedRun.failedTests}/{selectedRun.totalTests}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-500"
+                      style={{ width: `${((selectedRun.passedTests + selectedRun.failedTests) / selectedRun.totalTests) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
@@ -66,7 +87,6 @@ export default function TestRuns() {
                 </div>
               </div>
 
-              {/* Suggestions */}
               {selectedRun.suggestions && selectedRun.suggestions.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Optimization Suggestions</h4>
@@ -79,7 +99,6 @@ export default function TestRuns() {
                 </div>
               )}
 
-              {/* Steps */}
               <div className="space-y-2">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Test Steps (sample)</h4>
                 <div className="space-y-1">
@@ -103,6 +122,8 @@ export default function TestRuns() {
           )}
         </div>
       </div>
+
+      <NewTestRunDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
     </div>
   );
 }
