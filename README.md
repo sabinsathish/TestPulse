@@ -6,7 +6,7 @@ It enables fast, scalable, and cost-effective testing using intelligent simulati
 
 ---
 
-## 🚀 Overview
+## Overview
 
 TestPulse provides a unified platform to:
 - Simulate multiple device environments
@@ -18,7 +18,7 @@ It is built to reduce testing time, cost, and complexity while improving app rel
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 - **Simulation-Based Testing**
   - No need for physical devices
@@ -43,4 +43,36 @@ It is built to reduce testing time, cost, and complexity while improving app rel
 
 ---
 
-## 🏗️ Architecture
+## Tech Stack
+
+### Frontend
+- React
+- Chart.js (for analytics visualization)
+
+### Backend
+- Node.js
+- Express.js
+
+### Automation
+- Maestro
+- Appium
+
+### Database
+- MongoDB
+
+### Authentication
+- Firebase / JWT
+
+---
+
+## 📁 Project Structure
+
+TestPulse/
+├── frontend/ # React dashboard
+├── backend/ # API and orchestration logic
+├── automation/ # Test scripts (Maestro/Appium)
+├── simulator/ # Device simulation logic
+├── database/ # DB config/models
+├── .env.example
+├── package.json
+└── README.md
